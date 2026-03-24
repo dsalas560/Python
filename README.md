@@ -1,2 +1,2 @@
-# Python
-Python Projects 
+# Python 
+Python Projects Written using VSCode with Pylance and Python Extensions
