@@ -1,3 +1,2 @@
 Scapy
 Rich
-** Must run VSCode as Admin ** 
