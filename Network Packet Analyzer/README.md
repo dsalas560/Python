@@ -9,3 +9,5 @@
 * Display live stats — how many packets per protocol, top talkers (IPs sending the most traffic), packet sizes
 * Filter traffic — let you focus on just DNS queries, or just TCP, etc.
 * Log captures to a file so you can review sessions later
+
+**Must Run VSCode as Admin** 
