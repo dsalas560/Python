@@ -1,6 +1,7 @@
 import pygame
 from settings import *
 from world.dungeon import Dungeon
+from entities.player import Player
 
 class Game:
     def __init__(self, screen, clock):
@@ -14,10 +15,13 @@ class Game:
         """
         self.screen = screen
         self.clock = clock
-        self.running = True  # Controls the game loop — set to False to quit
+        self.running = True         # Controls the game loop — set to False to quit
 
         # Initialize the dungeon map
         self.dungeon = Dungeon()
+
+        # Spawn the player at grid position (2, 2) — safely inside the walls
+        self.player = Player(2, 2)
 
     def run(self):
         """
@@ -40,7 +44,6 @@ class Game:
         Currently handles:
             - Window close button (QUIT)
             - Escape key to exit the game
-        More input handling (player movement, etc.) will be added here later.
         """
         for event in pygame.event.get():
             if event.type == pygame.QUIT:           # User clicked the X button
@@ -52,21 +55,23 @@ class Game:
     def update(self):
         """
         Updates all game logic each frame.
-        Currently empty — will later handle:
-            - Player movement and collision
+        Currently handles:
+            - Player input and movement
+        Will later handle:
             - Enemy AI and pathfinding
             - Combat resolution
             - Game state changes (next floor, game over, etc.)
         """
-        pass
+        self.player.handle_input(self.dungeon)  # Read input and move player
 
     def draw(self):
         """
         Renders the current game state to the screen each frame.
         Drawing order matters — things drawn later appear on top.
-        Currently draws the dungeon tile grid.
-        Will later draw: player, enemies, HUD, etc.
+        Currently draws the dungeon tiles then the player on top.
+        Will later draw: enemies, HUD, etc.
         """
-        self.screen.fill(BLACK)         # Clear last frame
-        self.dungeon.draw(self.screen)  # Draw all dungeon tiles
-        pygame.display.flip()           # Push the finished frame to the display
+        self.screen.fill(BLACK)             # Clear last frame
+        self.dungeon.draw(self.screen)      # Draw dungeon tiles first (bottom layer)
+        self.player.draw(self.screen)       # Draw player on top of tiles
+        pygame.display.flip()               # Push finished frame to the display
