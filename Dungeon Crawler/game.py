@@ -15,13 +15,14 @@ class Game:
         """
         self.screen = screen
         self.clock = clock
-        self.running = True         # Controls the game loop — set to False to quit
+        self.running = True
 
-        # Initialize the dungeon map
+        # Generate the dungeon
         self.dungeon = Dungeon()
 
-        # Spawn the player at grid position (2, 2) — safely inside the walls
-        self.player = Player(2, 2)
+        # Spawn the player at the center of the first generated room
+        start_col, start_row = self.dungeon.rooms[0].center()
+        self.player = Player(start_col, start_row)
 
     def run(self):
         """
@@ -33,10 +34,10 @@ class Game:
             4. Draw everything to the screen
         """
         while self.running:
-            self.clock.tick(FPS)        # Cap the loop to FPS (defined in settings.py)
-            self.handle_events()         # Step 1: Process keyboard/mouse input
-            self.update()                # Step 2: Update positions, logic, AI
-            self.draw()                  # Step 3: Render everything to the screen
+            self.clock.tick(FPS)
+            self.handle_events()
+            self.update()
+            self.draw()
 
     def handle_events(self):
         """
@@ -46,10 +47,10 @@ class Game:
             - Escape key to exit the game
         """
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:           # User clicked the X button
+            if event.type == pygame.QUIT:
                 self.running = False
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:    # Escape key exits cleanly
+                if event.key == pygame.K_ESCAPE:
                     self.running = False
 
     def update(self):
@@ -62,7 +63,7 @@ class Game:
             - Combat resolution
             - Game state changes (next floor, game over, etc.)
         """
-        self.player.handle_input(self.dungeon)  # Read input and move player
+        self.player.handle_input(self.dungeon)
 
     def draw(self):
         """
@@ -71,7 +72,7 @@ class Game:
         Currently draws the dungeon tiles then the player on top.
         Will later draw: enemies, HUD, etc.
         """
-        self.screen.fill(BLACK)             # Clear last frame
-        self.dungeon.draw(self.screen)      # Draw dungeon tiles first (bottom layer)
-        self.player.draw(self.screen)       # Draw player on top of tiles
-        pygame.display.flip()               # Push finished frame to the display
+        self.screen.fill(BLACK)
+        self.dungeon.draw(self.screen)
+        self.player.draw(self.screen)
+        pygame.display.flip()
