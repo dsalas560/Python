@@ -2,6 +2,7 @@ import pygame
 from settings import *
 from world.dungeon import Dungeon
 from entities.player import Player
+from entities.enemy import Enemy
 
 class Game:
     def __init__(self, screen, clock):
@@ -23,6 +24,12 @@ class Game:
         # Spawn the player at the center of the first generated room
         start_col, start_row = self.dungeon.rooms[0].center()
         self.player = Player(start_col, start_row)
+
+        # Spawn one enemy in the center of each room except the first (player's room)
+        self.enemies = []
+        for room in self.dungeon.rooms[1:]:
+            col, row = room.center()
+            self.enemies.append(Enemy(col, row))
 
     def run(self):
         """
@@ -58,21 +65,29 @@ class Game:
         Updates all game logic each frame.
         Currently handles:
             - Player input and movement
+            - Enemy AI movement via A* pathfinding
         Will later handle:
-            - Enemy AI and pathfinding
             - Combat resolution
             - Game state changes (next floor, game over, etc.)
         """
         self.player.handle_input(self.dungeon)
 
+        # Update every enemy — each one will chase the player if in range
+        for enemy in self.enemies:
+            enemy.update(self.player, self.dungeon)
+
     def draw(self):
         """
         Renders the current game state to the screen each frame.
         Drawing order matters — things drawn later appear on top.
-        Currently draws the dungeon tiles then the player on top.
-        Will later draw: enemies, HUD, etc.
+        Order: dungeon tiles → enemies → player (player always on top)
         """
         self.screen.fill(BLACK)
         self.dungeon.draw(self.screen)
+
+        # Draw all enemies before the player so player renders on top
+        for enemy in self.enemies:
+            enemy.draw(self.screen)
+
         self.player.draw(self.screen)
         pygame.display.flip()
