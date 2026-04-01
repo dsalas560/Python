@@ -10,9 +10,7 @@ class Entity:
         - A pixel position on screen (derived from grid position)
         - A color for rendering
         - A rectangle for drawing and collision detection
-    
-    Player and Enemy will both inherit from this class and extend it
-    with their own specific behavior.
+        - Health and attack stats (set by subclasses)
     """
 
     def __init__(self, grid_x, grid_y, color):
@@ -22,8 +20,8 @@ class Entity:
             grid_y: Starting row in the dungeon grid
             color:  RGB tuple used to draw this entity
         """
-        self.grid_x = grid_x    # Current column position in the grid
-        self.grid_y = grid_y    # Current row position in the grid
+        self.grid_x = grid_x
+        self.grid_y = grid_y
         self.color = color
 
         # Pixel position on screen — derived from grid position
@@ -34,11 +32,16 @@ class Entity:
         # Slightly smaller than a full tile (4px padding) so movement feels clean
         self.rect = pygame.Rect(self.x + 4, self.y + 4, TILE_SIZE - 8, TILE_SIZE - 8)
 
+        # Stats — default values, overridden by Player and Enemy subclasses
+        self.max_health = 100
+        self.health = 100
+        self.attack = 0
+
     def move(self, dx, dy, dungeon):
         """
         Attempts to move the entity by (dx, dy) grid steps.
         Movement is grid-based — entities snap from tile to tile.
-        
+
         Checks for wall collisions before moving:
             - If the destination tile is a WALL, movement is blocked
             - If the destination tile is a FLOOR, movement is allowed
@@ -48,7 +51,6 @@ class Entity:
             dy:      Change in row (-1 up, +1 down, 0 no vertical move)
             dungeon: The Dungeon object used to check tile types at destination
         """
-        # Calculate the destination grid position
         new_x = self.grid_x + dx
         new_y = self.grid_y + dy
 
