@@ -1,8 +1,13 @@
-from modules.circuits import get_all_circuits, get_circuit_by_id
+from modules.history import get_all_champions, get_season_results, get_constructor_champions
 
-circuits = get_all_circuits()
-print(f"Total circuits: {len(circuits)}")
-print(circuits[0])
+champions = get_all_champions()
+print(f"Total champions: {len(champions)}")
+print(champions[-1])  # most recent champion
 
-monza = get_circuit_by_id("monza")
-print(monza)
+results = get_season_results(2023)
+print(f"\n2023 race winners: {len(results)}")
+print(results[0])
+
+constructors = get_constructor_champions()
+print(f"\nTotal constructor champions: {len(constructors)}")
+print(constructors[-1])
