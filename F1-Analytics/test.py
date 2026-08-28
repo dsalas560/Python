@@ -1,13 +1,21 @@
-from modules.history import get_all_champions, get_season_results, get_constructor_champions
+from modules.dashboard import get_driver_standings, get_constructor_standings, get_race_schedule, get_race_results, CURRENT_SEASON
 
-champions = get_all_champions()
-print(f"Total champions: {len(champions)}")
-print(champions[-1])  # most recent champion
+print(f"=== {CURRENT_SEASON} Driver Standings ===")
+drivers = get_driver_standings()
+for d in drivers[:3]:
+    print(d)
 
-results = get_season_results(2023)
-print(f"\n2023 race winners: {len(results)}")
-print(results[0])
+print(f"\n=== {CURRENT_SEASON} Constructor Standings ===")
+constructors = get_constructor_standings()
+for c in constructors[:3]:
+    print(c)
 
-constructors = get_constructor_champions()
-print(f"\nTotal constructor champions: {len(constructors)}")
-print(constructors[-1])
+print(f"\n=== {CURRENT_SEASON} Race Schedule ===")
+schedule = get_race_schedule()
+for r in schedule[:3]:
+    print(r)
+
+print(f"\n=== {CURRENT_SEASON} Round 1 Results ===")
+results = get_race_results(CURRENT_SEASON, 1)
+for r in results[:3]:
+    print(r)
