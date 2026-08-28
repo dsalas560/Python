@@ -1,10 +1,12 @@
 import requests
+from datetime import datetime
 
 BASE_URL = "https://api.jolpi.ca/ergast/f1"
+CURRENT_SEASON = datetime.now().year
 
 def get_all_champions() -> list[dict]:
     champions = []
-    for season in range(1950, 2025):
+    for season in range(1950, CURRENT_SEASON + 1):
         url = f"{BASE_URL}/{season}/driverStandings/1.json"
         response = requests.get(url)
         if response.status_code != 200:
@@ -47,7 +49,7 @@ def get_season_results(season: int) -> list[dict]:
 
 def get_constructor_champions() -> list[dict]:
     champions = []
-    for season in range(1958, 2025):
+    for season in range(1958, CURRENT_SEASON + 1):
         url = f"{BASE_URL}/{season}/constructorStandings/1.json"
         response = requests.get(url)
         if response.status_code != 200:
