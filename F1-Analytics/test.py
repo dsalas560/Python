@@ -33,3 +33,15 @@ print("\n=== 2026 Round 1 Pit Stops ===")
 stops = get_pit_stops(2026, 1)
 for s in stops[:5]:
     print(s)
+
+from modules.cache import cached_call
+from modules.history import get_all_champions
+
+print("=== Cache Test ===")
+# First call - fetches fresh
+champions = cached_call("all_champions", get_all_champions)
+print(f"Total champions: {len(champions)}")
+
+# Second call - should serve from disk instantly
+champions = cached_call("all_champions", get_all_champions)
+print(f"Total champions (cached): {len(champions)}")
