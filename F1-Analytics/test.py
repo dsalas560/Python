@@ -19,3 +19,17 @@ print(f"\n=== {CURRENT_SEASON} Round 1 Results ===")
 results = get_race_results(CURRENT_SEASON, 1)
 for r in results[:3]:
     print(r)
+
+
+from modules.strategy import get_race_strategy, get_pit_stops
+
+print("=== 2026 Round 1 Strategy ===")
+strategy = get_race_strategy(2026, 1)
+print(f"Event: {strategy['event']}")
+for driver, stints in list(strategy['strategy'].items())[:3]:
+    print(f"{driver}: {stints}")
+
+print("\n=== 2026 Round 1 Pit Stops ===")
+stops = get_pit_stops(2026, 1)
+for s in stops[:5]:
+    print(s)
