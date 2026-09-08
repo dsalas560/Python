@@ -13,6 +13,7 @@ from modules.dashboard import (
     CURRENT_SEASON
 )
 from modules.cache import cached_call
+from modules.strategy import get_race_strategy, get_pit_stops
 
 app = dash.Dash(__name__, suppress_callback_exceptions=True)
 app.title = "F1 Analytics"
