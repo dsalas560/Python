@@ -10,11 +10,26 @@ def get_race_strategy(season: int, round: int) -> dict:
     laps = session.laps[["Driver", "LapNumber", "Compound", "PitInTime", "PitOutTime", "LapTime"]].copy()
     laps = laps.dropna(subset=["Compound"])
 
-    drivers = laps["Driver"].unique().tolist()
+    # Get all drivers from the entry list
+    all_drivers = session.drivers
+    drivers_with_laps = laps["Driver"].unique().tolist()
 
     strategy = {}
-    for driver in drivers:
-        driver_laps = laps[laps["Driver"] == driver].copy()
+
+    # Handle DNS drivers — those in entry list but with no lap data
+    for driver_num in all_drivers:
+        try:
+            driver_info = session.get_driver(driver_num)
+            driver_code = driver_info["Abbreviation"]
+        except Exception:
+            driver_code = f"#{driver_num}"
+
+        driver_laps = laps[laps["Driver"] == driver_code]
+
+        if driver_laps.empty:
+            strategy[driver_code] = "DNS"
+            continue
+
         stints = []
         current_compound = None
         stint_start = None
@@ -37,7 +52,7 @@ def get_race_strategy(season: int, round: int) -> dict:
                 "end_lap": int(driver_laps["LapNumber"].max())
             })
 
-        strategy[driver] = stints
+        strategy[driver_code] = stints
 
     return {
         "season": season,
@@ -45,7 +60,6 @@ def get_race_strategy(season: int, round: int) -> dict:
         "event": session.event["EventName"],
         "strategy": strategy
     }
-
 def get_pit_stops(season: int, round: int) -> list[dict]:
     url = f"https://api.jolpi.ca/ergast/f1/{season}/{round}/pitstops.json?limit=100"
     import requests
