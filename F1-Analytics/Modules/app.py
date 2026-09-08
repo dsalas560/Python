@@ -202,10 +202,122 @@ def update_race_results(round_num, season):
     )
 
 
-# ── Placeholder pages (we'll fill these next) ─────────────────────────────────
-def strategy_layout():
-    return html.Div(html.H2("Strategy — coming soon", style={"color": "#E8002D"}))
+from modules.strategy import get_race_strategy, get_pit_stops
 
+def strategy_layout():
+    seasons = list(range(2018, CURRENT_SEASON + 1))[::-1]
+    return html.Div([
+        html.H2("Race Strategy", style={"color": "#E8002D"}),
+
+        # Selectors
+        html.Div([
+            html.Div([
+                html.Label("Season:", style={"marginRight": "8px"}),
+                dcc.Dropdown(
+                    id="strategy-season",
+                    options=[{"label": str(s), "value": s} for s in seasons],
+                    value=CURRENT_SEASON,
+                    clearable=False,
+                    style={"width": "140px", "color": "#000"}
+                )
+            ], style={"display": "flex", "alignItems": "center", "marginRight": "24px"}),
+
+            html.Div([
+                html.Label("Round:", style={"marginRight": "8px"}),
+                dcc.Dropdown(
+                    id="strategy-round",
+                    options=[{"label": f"Round {r}", "value": r} for r in range(1, 25)],
+                    value=1,
+                    clearable=False,
+                    style={"width": "160px", "color": "#000"}
+                )
+            ], style={"display": "flex", "alignItems": "center"})
+        ], style={"display": "flex", "marginBottom": "24px"}),
+
+        # Tire strategy chart
+        html.H3("Tire Strategy", style={"color": "#E8002D"}),
+        dcc.Loading(
+            dcc.Graph(id="tire-strategy-chart"),
+            type="circle",
+            color="#E8002D"
+        ),
+
+        # Pit stop table
+        html.H3("Pit Stops", style={"color": "#E8002D", "marginTop": "24px"}),
+        dcc.Loading(
+            html.Div(id="pit-stop-table"),
+            type="circle",
+            color="#E8002D"
+        )
+    ])
+
+
+@app.callback(
+    Output("tire-strategy-chart", "figure"),
+    Output("pit-stop-table", "children"),
+    Input("strategy-season", "value"),
+    Input("strategy-round", "value")
+)
+def update_strategy(season, round_num):
+    # Tire strategy
+    strategy_data = cached_call(
+        f"strategy_{season}_{round_num}",
+        get_race_strategy, season, round_num
+    )
+
+    fig = go.Figure()
+    drivers = list(strategy_data["strategy"].keys())
+
+    for i, driver in enumerate(drivers):
+        stints = strategy_data["strategy"][driver]
+        for stint in stints:
+            compound = stint["compound"]
+            color = COMPOUND_COLORS.get(compound, "#999999")
+            fig.add_trace(go.Bar(
+                x=[stint["end_lap"] - stint["start_lap"] + 1],
+                y=[driver],
+                base=[stint["start_lap"] - 1],
+                orientation="h",
+                marker_color=color,
+                name=compound,
+                showlegend=compound not in [t.name for t in fig.data],
+                hovertemplate=f"{driver} — {compound}<br>Laps {stint['start_lap']}–{stint['end_lap']}<extra></extra>"
+            ))
+
+    fig.update_layout(
+        title=f"{strategy_data['event']} {season} — Tire Strategy",
+        barmode="stack",
+        template="plotly_dark",
+        plot_bgcolor="#15151E",
+        paper_bgcolor="#15151E",
+        xaxis_title="Lap",
+        yaxis_title="Driver",
+        height=600,
+        legend_title="Compound"
+    )
+
+    # Pit stops table
+    pit_stops = cached_call(
+        f"pitstops_{season}_{round_num}",
+        get_pit_stops, season, round_num
+    )
+
+    if not pit_stops:
+        pit_table = html.P("No pit stop data available.", style={"color": "#888"})
+    else:
+        df_pits = pd.DataFrame(pit_stops)
+        pit_table = dash_table.DataTable(
+            data=df_pits.to_dict("records"),
+            columns=[{"name": c.title(), "id": c} for c in df_pits.columns],
+            sort_action="native",
+            style_table={"overflowX": "auto"},
+            style_cell={"backgroundColor": "#15151E", "color": "#FFF", "border": "1px solid #333", "textAlign": "left", "padding": "8px"},
+            style_header={"backgroundColor": "#E8002D", "color": "#FFF", "fontWeight": "bold"},
+        )
+
+    return fig, pit_table
+    
+# ── Placeholder pages (we'll fill these next) ─────────────────────────────────
 def history_layout():
     return html.Div(html.H2("History — coming soon", style={"color": "#E8002D"}))
 
